@@ -2,65 +2,84 @@ package id.sch.smktelkom_mlg.learn.advancedwidget1;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutCompat;
-import android.text.InputType;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
-
-import org.w3c.dom.Text;
 
 public class MainActivity extends AppCompatActivity {
 
+    Spinner spJumlah;
+    LinearLayout llAnak;
+    TextView tvHasil;
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate( Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final LinearLayout llMain = (LinearLayout) findViewById(R.id.linearLayoutMain);
+        spJumlah = (Spinner) findViewById(R.id.spinnerJumlahAnak);
+        Integer [] arJumlah = new Integer[10];
+        for (int i = 0; i < 10; i++)
+        {
+            arJumlah[i]=i+1;
+        }
+        ArrayAdapter adapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, arJumlah);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spJumlah.setAdapter(adapter);
 
-        addEditText(llMain);
+        llAnak = (LinearLayout) findViewById(R.id.linearLayoutAnak);
+        tvHasil = (TextView) findViewById(R.id.textViewHasil);
 
-        Button bProses = new Button(this);
-        bProses.setText("Proses");
-        llMain.addView(bProses);
-        final TextView tvHasil = new TextView(this);
-        llMain.addView(tvHasil);
-
-        bProses.setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.buttonProses).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view)
+            public void onClick(View view) {
+                doProses();
+            }
+        });
+
+        spJumlah.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+
+                addEditText((int)spJumlah.getSelectedItem());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView)
             {
-                doProses(llMain);
+                //
             }
         });
     }
 
-    private void addEditText(LinearLayout llMain)
+    private void addEditText(int jumlah)
     {
-        for (int i = 1; i <= 5; i++)
+        llAnak.removeAllViews();
+        for (int i = 1; i <= jumlah; i++)
         {
-            EditText etNama = new EditText(this);
-            etNama.setHint("Isikan Nama Anak ke-"+i);
-            llMain.addView(etNama);
-
-            EditText etUmur = new EditText(this);
-            etUmur.setHint("Isikan Umur Anak ke-"+i);
-            etUmur.setInputType(InputType.TYPE_CLASS_NUMBER);
-            llMain.addView(etUmur);
+            View v = LayoutInflater.from(this).inflate(R.layout.layout_anak, llAnak, false);
+            v.setTag("Anak"+i);
+            llAnak.addView(v);
         }
     }
 
-    private void doProses(LinearLayout llMain)
-
+    private void doProses()
     {
-        String hasil="";
-        for (int i = 0; i < 5; i++)
+        int jumlah = (int) spJumlah.getSelectedItem();
+        String hasil ="";
+        for (int i = 1; i <= jumlah; i++ )
         {
-            EditText etNama = (EditText) llMain.getChildAt(i*2);
-            EditText etUmur = (EditText) llMain.getChildAt((i*2)+1);
+            LinearLayout llNoew = (LinearLayout) llAnak.findViewWithTag("Anak"+i);
+
+            EditText etNama = (EditText) llNoew.findViewById(R.id.editTextNama);
+            EditText etUmur = (EditText) llNoew.findViewById(R.id.editTextUmur);
 
             String nama = etNama.getText().toString().trim();
             String umur = etUmur.getText().toString();
@@ -68,9 +87,8 @@ public class MainActivity extends AppCompatActivity {
             if (umur.isEmpty())
                 umur="0";
             if (!nama.isEmpty())
-                hasil += "Anak ke-"+(i+1)+": "+ nama +" umur "+umur+" tahun\n";
+                hasil += "Anak ke-"+ i + ": " + nama +" umur " + umur+" tahun\n";
         }
-        TextView tvHasil = (TextView) llMain.getChildAt(11);
         tvHasil.setText(hasil);
     }
 }
